@@ -21,6 +21,8 @@ export default function DashboardPage() {
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const email = localStorage.getItem('email')
+  const [sortBy, setSortBy] = useState<'date' | 'company' | 'status'>('date')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
 
   useEffect(() => {
     fetchApplications()
@@ -74,6 +76,25 @@ export default function DashboardPage() {
       a.company.toLowerCase().includes(search.toLowerCase()) ||
       a.position.toLowerCase().includes(search.toLowerCase())
     )
+    .sort((a, b) => {
+      let valA: string
+      let valB: string
+
+      if (sortBy === 'date') {
+        valA = a.appliedAt
+        valB = b.appliedAt
+      } else if (sortBy === 'company') {
+        valA = a.company.toLowerCase()
+        valB = b.company.toLowerCase()
+      } else {
+        valA = a.status
+        valB = b.status
+      }
+
+      if (valA < valB) return sortDir === 'asc' ? -1 : 1
+      if (valA > valB) return sortDir === 'asc' ? 1 : -1
+      return 0
+    })
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -137,11 +158,35 @@ export default function DashboardPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-800">
-                <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Company</th>
-                <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Position</th>
-                <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Status</th>
-                <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Date</th>
-                <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Actions</th>
+                {[
+                  { label: 'Company', key: 'company' },
+                  { label: 'Position', key: null },
+                  { label: 'Status', key: 'status' },
+                  { label: 'Date', key: 'date' },
+                  { label: 'Actions', key: null },
+                ].map(col => (
+                  <th
+                    key={col.label}
+                    className="text-left px-6 py-4 text-gray-400 font-medium text-sm"
+                  >
+                    {col.key ? (
+                      <button
+                        onClick={() => {
+                          if (sortBy === col.key) {
+                            setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+                          } else {
+                            setSortBy(col.key as 'date' | 'company' | 'status')
+                            setSortDir('asc')
+                          }
+                        }}
+                        className="flex items-center gap-1 hover:text-white transition"
+                      >
+                        {col.label}
+                        {sortBy === col.key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕'}
+                      </button>
+                    ) : col.label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
