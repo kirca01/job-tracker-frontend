@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAll, remove } from '../api/applications'
 import type { JobApplication } from '../types'
+import toast from 'react-hot-toast'
 
 const STATUS_COLORS: Record<string, string> = {
   Applied: 'bg-blue-500',
@@ -36,9 +37,28 @@ export default function DashboardPage() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this application?')) return
-    await remove(id)
-    setApplications(prev => prev.filter(a => a.id !== id))
+    toast((t) => (
+      <div className="flex items-center gap-3">
+        <span>Delete this application?</span>
+        <button
+          onClick={async () => {
+            toast.dismiss(t.id)
+            await remove(id)
+            setApplications(prev => prev.filter(a => a.id !== id))
+            toast.success('Application deleted.')
+          }}
+          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+        >
+          Delete
+        </button>
+        <button
+          onClick={() => toast.dismiss(t.id)}
+          className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm"
+        >
+          Cancel
+        </button>
+      </div>
+    ), { duration: 5000 })
   }
 
   const handleLogout = () => {
