@@ -5,6 +5,7 @@ import DashboardPage from './pages/DashboardPage'
 import AddApplicationPage from './pages/AddApplicationPage'
 import EditApplicationPage from './pages/EditApplicationPage'
 import StatsPage from './pages/StatsPage'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
@@ -13,13 +14,20 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/add" element={<AddApplicationPage />} />
-        <Route path="/edit/:id" element={<EditApplicationPage />} />
-        <Route path="/stats" element={<StatsPage />} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute><DashboardPage /></ProtectedRoute>
+        } />
+        <Route path="/add" element={
+          <ProtectedRoute><AddApplicationPage /></ProtectedRoute>
+        } />
+        <Route path="/edit/:id" element={
+          <ProtectedRoute><EditApplicationPage /></ProtectedRoute>
+        } />
+        <Route path="/stats" element={
+          <ProtectedRoute><StatsPage /></ProtectedRoute>
+        } />
       </Routes>
     </BrowserRouter>
   )
 }
-
 export default App
