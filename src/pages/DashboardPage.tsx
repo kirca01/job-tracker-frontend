@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getAll, remove } from '../api/applications'
 import type { JobApplication } from '../types'
 import toast from 'react-hot-toast'
+import SkeletonRow from '../components/SkeletonRow'
 
 const STATUS_COLORS: Record<string, string> = {
   Applied: 'bg-blue-500',
@@ -74,12 +75,6 @@ export default function DashboardPage() {
       a.position.toLowerCase().includes(search.toLowerCase())
     )
 
-  if (loading) return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <p className="text-gray-400">Loading...</p>
-    </div>
-  )
-
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       <nav className="bg-gray-900 border-b border-gray-800 px-6 py-4">
@@ -138,24 +133,28 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {filtered.length === 0 ? (
-          <div className="text-center py-20 text-gray-500">
-            <p className="text-lg">No applications found.</p>
-          </div>
-        ) : (
-          <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-800">
-                  <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Company</th>
-                  <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Position</th>
-                  <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Status</th>
-                  <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Date</th>
-                  <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Actions</th>
+        <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-800">
+                <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Company</th>
+                <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Position</th>
+                <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Status</th>
+                <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Date</th>
+                <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                [...Array(5)].map((_, i) => <SkeletonRow key={i} />)
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-20 text-gray-500">
+                    No applications found.
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filtered.map((app, index) => (
+              ) : (
+                filtered.map((app, index) => (
                   <tr key={app.id} className={index !== filtered.length - 1 ? 'border-b border-gray-800' : ''}>
                     <td className="px-6 py-4 font-medium">{app.company}</td>
                     <td className="px-6 py-4 text-gray-300">{app.position}</td>
@@ -182,11 +181,11 @@ export default function DashboardPage() {
                       </button>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
