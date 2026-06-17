@@ -3,6 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { getAll, remove } from '../api/applications'
 import type { JobApplication } from '../types'
 
+const STATUS_COLORS: Record<string, string> = {
+  Applied: 'bg-blue-500',
+  Interview: 'bg-yellow-500',
+  Offer: 'bg-green-500',
+  Rejected: 'bg-red-500',
+}
+
 export default function DashboardPage() {
   const navigate = useNavigate()
   const [applications, setApplications] = useState<JobApplication[]>([])
@@ -36,77 +43,97 @@ export default function DashboardPage() {
     navigate('/login')
   }
 
-  const statusColors: Record<string, string> = {
-    Applied: '#3b82f6',
-    Interview: '#f59e0b',
-    Offer: '#10b981',
-    Rejected: '#ef4444',
-  }
-
-  if (loading) return <p style={{ padding: 24 }}>Loading...</p>
+  if (loading) return (
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <p className="text-gray-400">Loading...</p>
+    </div>
+  )
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>Job Tracker</h1>
-        <div>
-          <span style={{ marginRight: 16 }}>{email}</span>
-          <button onClick={handleLogout}>Logout</button>
+    <div className="min-h-screen bg-gray-950 text-white">
+      <nav className="bg-gray-900 border-b border-gray-800 px-6 py-4">
+        <div className="max-w-5xl mx-auto flex justify-between items-center">
+          <h1 className="text-xl font-bold">Job Tracker</h1>
+          <div className="flex items-center gap-4">
+            <span className="text-gray-400 text-sm">{email}</span>
+            <button
+              onClick={() => navigate('/stats')}
+              className="text-sm bg-gray-800 hover:bg-gray-700 px-3 py-2 rounded-lg transition"
+            >
+              📊 Stats
+            </button>
+            <button
+              onClick={handleLogout}
+              className="text-sm text-gray-400 hover:text-white transition"
+            >
+              Logout
+            </button>
+          </div>
         </div>
+      </nav>
+
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold">Applications</h2>
+          <button
+            onClick={() => navigate('/add')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+          >
+            + Add Application
+          </button>
+        </div>
+
+        {applications.length === 0 ? (
+          <div className="text-center py-20 text-gray-500">
+            <p className="text-lg">No applications yet.</p>
+            <p className="text-sm mt-1">Add your first one!</p>
+          </div>
+        ) : (
+          <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-800">
+                  <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Company</th>
+                  <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Position</th>
+                  <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Status</th>
+                  <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Date</th>
+                  <th className="text-left px-6 py-4 text-gray-400 font-medium text-sm">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {applications.map((app, index) => (
+                  <tr key={app.id} className={index !== applications.length - 1 ? 'border-b border-gray-800' : ''}>
+                    <td className="px-6 py-4 font-medium">{app.company}</td>
+                    <td className="px-6 py-4 text-gray-300">{app.position}</td>
+                    <td className="px-6 py-4">
+                      <span className={`${STATUS_COLORS[app.status]} text-white text-xs px-2 py-1 rounded-full`}>
+                        {app.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-400 text-sm">
+                      {new Date(app.appliedAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => navigate(`/edit/${app.id}`)}
+                        className="text-blue-400 hover:text-blue-300 text-sm mr-4 transition"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(app.id)}
+                        className="text-red-400 hover:text-red-300 text-sm transition"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
-
-      <button
-        onClick={() => navigate('/add')}
-        style={{ marginBottom: 24, padding: '10px 20px' }}
-      >
-        + Add Application
-      </button>
-      <button
-        onClick={() => navigate('/stats')}
-        style={{ marginBottom: 24, marginLeft: 8, padding: '10px 20px' }}
-      >
-        📊 Stats
-      </button>
-
-      {applications.length === 0 ? (
-        <p>No applications yet. Add your first one!</p>
-      ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              <th style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #333' }}>Company</th>
-              <th style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #333' }}>Position</th>
-              <th style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #333' }}>Status</th>
-              <th style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #333' }}>Date</th>
-              <th style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #333' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {applications.map(app => (
-              <tr key={app.id}>
-                <td style={{ padding: 8 }}>{app.company}</td>
-                <td style={{ padding: 8 }}>{app.position}</td>
-                <td style={{ padding: 8 }}>
-                  <span style={{
-                    background: statusColors[app.status],
-                    color: 'white',
-                    padding: '2px 8px',
-                    borderRadius: 4,
-                    fontSize: 12
-                  }}>
-                    {app.status}
-                  </span>
-                </td>
-                <td style={{ padding: 8 }}>{new Date(app.appliedAt).toLocaleDateString()}</td>
-                <td style={{ padding: 8 }}>
-                  <button onClick={() => navigate(`/edit/${app.id}`)} style={{ marginRight: 8 }}>Edit</button>
-                  <button onClick={() => handleDelete(app.id)} style={{ color: 'red' }}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
     </div>
   )
 }
