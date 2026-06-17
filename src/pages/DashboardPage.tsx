@@ -23,10 +23,17 @@ export default function DashboardPage() {
   const email = localStorage.getItem('email')
   const [sortBy, setSortBy] = useState<'date' | 'company' | 'status'>('date')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 5
+
 
   useEffect(() => {
     fetchApplications()
   }, [])
+
+  useEffect(() => {
+    setPage(1)
+  }, [filter, search, sortBy])
 
   const fetchApplications = async () => {
     try {
@@ -95,6 +102,8 @@ export default function DashboardPage() {
       if (valA > valB) return sortDir === 'asc' ? 1 : -1
       return 0
     })
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
+    const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -199,7 +208,7 @@ export default function DashboardPage() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((app, index) => (
+                paginated.map((app, index) => (
                   <tr key={app.id} className={index !== filtered.length - 1 ? 'border-b border-gray-800' : ''}>
                     <td className="px-6 py-4 font-medium">{app.company}</td>
                     <td className="px-6 py-4 text-gray-300">{app.position}</td>
@@ -230,6 +239,29 @@ export default function DashboardPage() {
               )}
             </tbody>
           </table>
+          {totalPages > 1 && (
+            <div className="flex justify-between items-center px-6 py-4 border-t border-gray-800">
+              <span className="text-gray-400 text-sm">
+                Page {page} of {totalPages}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage(p => p - 1)}
+                  disabled={page === 1}
+                  className="px-3 py-1 rounded-lg text-sm bg-gray-800 text-gray-400 hover:text-white disabled:opacity-40 transition"
+                >
+                  ← Prev
+                </button>
+                <button
+                  onClick={() => setPage(p => p + 1)}
+                  disabled={page === totalPages}
+                  className="px-3 py-1 rounded-lg text-sm bg-gray-800 text-gray-400 hover:text-white disabled:opacity-40 transition"
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
