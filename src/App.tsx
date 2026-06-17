@@ -4,6 +4,7 @@ import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
 import AddApplicationPage from './pages/AddApplicationPage'
 import EditApplicationPage from './pages/EditApplicationPage'
+import StatsPage from './pages/StatsPage'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/add" element={<AddApplicationPage />} />
         <Route path="/edit/:id" element={<EditApplicationPage />} />
+        <Route path="/stats" element={<StatsPage />} />
       </Routes>
     </BrowserRouter>
   )

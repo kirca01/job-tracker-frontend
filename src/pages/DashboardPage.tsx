@@ -61,6 +61,12 @@ export default function DashboardPage() {
       >
         + Add Application
       </button>
+      <button
+        onClick={() => navigate('/stats')}
+        style={{ marginBottom: 24, marginLeft: 8, padding: '10px 20px' }}
+      >
+        📊 Stats
+      </button>
 
       {applications.length === 0 ? (
         <p>No applications yet. Add your first one!</p>
