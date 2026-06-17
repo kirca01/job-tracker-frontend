@@ -10,9 +10,13 @@ const STATUS_COLORS: Record<string, string> = {
   Rejected: 'bg-red-500',
 }
 
+const STATUSES = ['All', 'Applied', 'Interview', 'Offer', 'Rejected']
+
 export default function DashboardPage() {
   const navigate = useNavigate()
   const [applications, setApplications] = useState<JobApplication[]>([])
+  const [filter, setFilter] = useState('All')
+  const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const email = localStorage.getItem('email')
 
@@ -42,6 +46,13 @@ export default function DashboardPage() {
     localStorage.removeItem('email')
     navigate('/login')
   }
+
+  const filtered = applications
+    .filter(a => filter === 'All' || a.status === filter)
+    .filter(a =>
+      a.company.toLowerCase().includes(search.toLowerCase()) ||
+      a.position.toLowerCase().includes(search.toLowerCase())
+    )
 
   if (loading) return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center">
@@ -83,10 +94,33 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {applications.length === 0 ? (
+        <div className="flex gap-3 mb-6">
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search by company or position..."
+            className="flex-1 bg-gray-900 text-white rounded-lg px-4 py-2 border border-gray-800 focus:outline-none focus:border-blue-500"
+          />
+          <div className="flex gap-2">
+            {STATUSES.map(s => (
+              <button
+                key={s}
+                onClick={() => setFilter(s)}
+                className={`px-3 py-2 rounded-lg text-sm transition ${
+                  filter === s
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-900 text-gray-400 hover:text-white border border-gray-800'
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {filtered.length === 0 ? (
           <div className="text-center py-20 text-gray-500">
-            <p className="text-lg">No applications yet.</p>
-            <p className="text-sm mt-1">Add your first one!</p>
+            <p className="text-lg">No applications found.</p>
           </div>
         ) : (
           <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
@@ -101,8 +135,8 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {applications.map((app, index) => (
-                  <tr key={app.id} className={index !== applications.length - 1 ? 'border-b border-gray-800' : ''}>
+                {filtered.map((app, index) => (
+                  <tr key={app.id} className={index !== filtered.length - 1 ? 'border-b border-gray-800' : ''}>
                     <td className="px-6 py-4 font-medium">{app.company}</td>
                     <td className="px-6 py-4 text-gray-300">{app.position}</td>
                     <td className="px-6 py-4">
